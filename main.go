@@ -1,51 +1,41 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"io/ioutil"
+	"math/rand"
 	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
+	"time"
 )
 
 func main() {
-	var files []string
+	start := time.Now()
+	root := flag.String("dir", "", "Root Directory path where HTML files are stored.")
+	version := flag.Int("ver", rand.Intn(999), "Version number which whill be used to update the JS or CSS files version. If not specified random number is generated within 999")
+	flag.Parse()
+	if *root == "" {
+		fmt.Println("Directory name is mandtory. Please check --help")
+		os.Exit(2)
+	}
 
-	root := "c:\\Users\\raghuveer.k\\Desktop\\Temp"
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() || (filepath.Ext(path) != ".html" && filepath.Ext(path) != ".htm") {
-			return nil
-		}
-		files = append(files, path)
-		return nil
-	})
+	vFiles, err := getHTMLFiles(*root)
+
 	if err != nil {
-		panic(err)
+		fmt.Println("Error in reading files, please check path", err)
+		os.Exit(2)
 	}
 
-	jsDQuote := regexp.MustCompile(`\.js(\?*.*\d*")`)
-	jsSQuote := regexp.MustCompile(`\.js(\?*.*\d*')`)
-	cssDQuote := regexp.MustCompile(`\.css(\?*\w*=*\d*")`)
-	cssSQuote := regexp.MustCompile(`\.css(\?*\w*=*\d*')`)
-	for _, file := range files {
-		fileContents, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Println("Error reading file contents")
-			os.Exit(2)
-		}
-		lines := strings.Split(string(fileContents), "\n")
-		fmt.Println("--------file name : ", file, "-----------------")
-		for _, line := range lines {
-			if jsDQuote.MatchString(line) {
-				fmt.Println(jsDQuote.ReplaceAllString(line, ".js?v=123\""))
-			} else if jsSQuote.MatchString(line) {
-				fmt.Println(jsSQuote.ReplaceAllString(line, ".js?v=123'"))
-			} else if cssDQuote.MatchString(line) {
-				fmt.Println(cssDQuote.ReplaceAllString(line, ".css?v=123\""))
-			} else if cssSQuote.MatchString(line) {
-				fmt.Println(cssDQuote.ReplaceAllString(line, ".css?v=123'"))
-			}
-		}
+	err = readFileContents(vFiles)
+
+	if err != nil {
+		fmt.Println("Error in Reading file contents", err)
+		os.Exit(2)
 	}
+
+	for _, vFile := range vFiles {
+		vFile.updateVersion(*version)
+		vFile.writeToFile()
+	}
+
+	fmt.Println("Total time taken : ", time.Since(start))
 }
