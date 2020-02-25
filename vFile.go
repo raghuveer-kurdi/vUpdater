@@ -13,6 +13,8 @@ type vFile struct {
 	uContent string
 }
 
+//this file has file structure and other utility methods like reading and writing to files. 
+
 func (vf vFile) print(modified bool) {
 	fmt.Println("********************** ", vf.name, " ********************")
 	fmt.Println("Path : ", vf.path)

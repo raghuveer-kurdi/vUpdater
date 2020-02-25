@@ -9,8 +9,11 @@ import (
 )
 
 func main() {
+	
 	start := time.Now()
+	//Root directory path, where version values need to be injected
 	root := flag.String("dir", "", "Root Directory path where HTML files are stored.")
+	//Optional: version can be passed from command line, else it should take a random number within 999.
 	version := flag.Int("ver", rand.Intn(999), "Version number which whill be used to update the JS or CSS files version. If not specified random number is generated within 999")
 	flag.Parse()
 	if *root == "" {

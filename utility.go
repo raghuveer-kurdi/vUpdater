@@ -19,6 +19,7 @@ const (
 )
 
 func modifyLine(line string, version int) string {
+	//Utility method which inserts the version.
 	jsDQuote := regexp.MustCompile(jsDRegEx)
 	jsSQuote := regexp.MustCompile(jsSRegEx)
 	cssDQuote := regexp.MustCompile(cssDRegEx)
